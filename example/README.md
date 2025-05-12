@@ -8,7 +8,7 @@ This is a minimal react/nextjs implementation of server side subdomain registrat
 
 ## Installation
 
-1. Clone the repository from [here](https://github.com/Bonfida/sub-registrar).
+1. Clone the repository from [here](https://github.com/SolanaNameService/sub-registrar).
 
 2. Navigate to the example folder under the cloned repository.
 
@@ -47,7 +47,7 @@ The server will start running at http://localhost:3000.
 
 ## Bugs and Issues
 
-If you encounter any bugs or issues, please report them [here](https://github.com/Bonfida/sub-registrar/issues).
+If you encounter any bugs or issues, please report them [here](https://github.com/SolanaNameService/sub-registrar/issues).
 
 ## License
 
