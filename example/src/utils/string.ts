@@ -1,4 +1,4 @@
-import { Language, checkLanguage, findLang } from "@bonfida/emojis";
+import { Language, findLang } from "@bonfida/emojis";
 
 /**
  * Checks if a subdomain name is valid
@@ -10,10 +10,5 @@ export const isValidSubdomain = (subdomain: string) => {
     return false;
   }
 
-  const lang = findLang(subdomain);
-  if (lang === Language.Unauthorized) {
-    return false;
-  }
-
-  return checkLanguage(subdomain, lang);
+  return findLang(subdomain) !== Language.Unauthorized;
 };
