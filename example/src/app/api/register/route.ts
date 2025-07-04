@@ -1,77 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+
+import { SUBREGISTRAR_MODE } from "@/config";
 import {
-  getDomainKeySync,
-  NAME_PROGRAM_ID,
-  transferInstruction,
-} from "@bonfida/spl-name-service";
-import { adminRegister, Registrar } from "@bonfida/sub-register";
-import {
-  Connection,
-  Keypair,
-  PublicKey,
-  TransactionInstruction,
-  TransactionMessage,
-  VersionedTransaction,
-} from "@solana/web3.js";
-import bs58 from "bs58";
+  getCreateSubdomainForSubregistrarIxs,
+  getCreateSubdomainIxs,
+} from "@/utils/instructions";
+import { sendAndConfirmTxWithRetry } from "@/utils/send-and-confirm-tx-with-retry";
 import { isValidSubdomain } from "@/utils/string";
-
-const ADMIN_KEYPAIR = Keypair.fromSecretKey(
-  new Uint8Array(bs58.decode(process.env.PRIVATE_KEY!))
-);
-const CONNECTION = new Connection(process.env.NEXT_PUBLIC_RPC!, "processed");
-
-const getSubRegistrar = async () => {
-  const registrars = await Registrar.findForDomain(
-    CONNECTION,
-    getDomainKeySync(process.env.NEXT_PUBLIC_DOMAIN_NAME!).pubkey
-  );
-  if (registrars.length === 0) {
-    throw new Error("Subdomain registrar not found");
-  }
-  return registrars[0];
-};
-
-const sendAndConfirmTxWithRetry = async ({
-  instructions,
-  maxRetry,
-  retryDelay,
-}: {
-  instructions: TransactionInstruction[];
-  maxRetry: number;
-  retryDelay: number;
-}) => {
-  for (let attempt = 0; attempt < maxRetry; attempt++) {
-    try {
-      const latestBlockhash = await CONNECTION.getLatestBlockhash();
-
-      const messageV0 = new TransactionMessage({
-        payerKey: ADMIN_KEYPAIR.publicKey,
-        recentBlockhash: latestBlockhash.blockhash,
-        instructions,
-      }).compileToV0Message();
-
-      const versionedTransaction = new VersionedTransaction(messageV0);
-      versionedTransaction.sign([ADMIN_KEYPAIR]);
-
-      const txid = await CONNECTION.sendTransaction(versionedTransaction);
-      const confirmation = await CONNECTION.confirmTransaction({
-        signature: txid,
-        blockhash: latestBlockhash.blockhash,
-        lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-      });
-
-      if (confirmation.value.err) {
-        throw new Error("Transaction not confirmed");
-      } else {
-        return txid;
-      }
-    } catch {
-      await new Promise((resolve) => setTimeout(resolve, retryDelay));
-    }
-  }
-  throw new Error(`Transaction failed after ${maxRetry} retries`);
-};
 
 /**
  * Registers a subdomain and transfer it to the target account
@@ -100,29 +35,11 @@ export const POST = async (request: NextRequest) => {
   }
 
   try {
-    const subRegistrar = await getSubRegistrar();
-    const domainKey = getDomainKeySync(
-      `${subdomain}.${process.env.NEXT_PUBLIC_DOMAIN_NAME}`
-    );
-    const instructions = [
-      // Register subdomain as admin
-      ...(await adminRegister(
-        CONNECTION,
-        subRegistrar.pubkey,
-        subdomain,
-        ADMIN_KEYPAIR.publicKey
-      )),
-      // Sends registered subdomain to target account
-      transferInstruction(
-        NAME_PROGRAM_ID,
-        domainKey.pubkey,
-        new PublicKey(targetPublicKey),
-        ADMIN_KEYPAIR.publicKey,
-        undefined,
-        domainKey.parent,
-        ADMIN_KEYPAIR.publicKey
-      ),
-    ];
+    const instructions = await (
+      SUBREGISTRAR_MODE
+        ? getCreateSubdomainForSubregistrarIxs
+        : getCreateSubdomainIxs
+    )({ subdomain, targetPublicKey });
 
     const txid = await sendAndConfirmTxWithRetry({
       instructions,
