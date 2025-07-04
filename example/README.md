@@ -1,25 +1,28 @@
 # SNS Subdomain Registrar Demo
+
 This is a minimal react/nextjs implementation of server side subdomain registration through SNS sub-registrar.
 
 ## Prerequisites
+
 - Node.js version 18 or above
 - SNS domain
 - Full access to Solana RPC
 
 ## Installation
 
-1. Clone the repository from [here](https://github.com/SolanaNameService/sub-registrar).
+1.  Clone the repository from [here](https://github.com/SolanaNameService/sub-registrar).
 
-2. Navigate to the example folder under the cloned repository.
+2.  Navigate to the example folder under the cloned repository.
 
-3. Install the dependencies by running the following command:
+3.  Install the dependencies by running the following command:
 
         npm install
 
-4. Register a domain on [SNS](https://www.sns.id/) and create a sub-registrar using the registered domain.
+4.  Register a domain on [SNS](https://www.sns.id/) and create a sub-registrar using the registered domain.
 
-5. Copy the .env.example file and rename it to .env. Configure the .env file as follows:
+5.  Copy the .env.example file and rename it to .env. Configure the .env file as follows:
     - PRIVATE_KEY: Private key of sub-registrar admin as a bs58 encoded string
+    - SUBREGISTRAR_MODE: Set to "true" if the subdomains should be created through a subregistrar, or leave it blank to create subdomains through the parent domain
     - NEXT_PUBLIC_RPC: Solana RPC endpoint
     - NEXT_PUBLIC_DOMAIN_NAME: Domain name of the sub-registrar
 
@@ -33,15 +36,15 @@ The server will start running at http://localhost:3000.
 
 ## Dependencies
 
-- @bonfida/emojis: ^1.0.4
-- @bonfida/spl-name-service: 2.5.4
-- @bonfida/sub-register: ^0.0.1-alpha.8
-- @solana/wallet-adapter-base: ^0.9.23
-- @solana/wallet-adapter-react: ^0.15.35
-- @solana/wallet-adapter-react-ui: ^0.9.35
-- @solana/web3.js: ^1.95.1
+- @bonfida/emojis: ^1.0.6
+- @bonfida/spl-name-service: 3.0.12
+- @bonfida/sub-register: ^0.1.0
+- @solana/wallet-adapter-base: ^0.9.27
+- @solana/wallet-adapter-react: ^0.15.39
+- @solana/wallet-adapter-react-ui: ^0.9.39
+- @solana/web3.js: ^1.98.2
 - bs58: ^6.0.0
-- next: 14.2.5
+- next: 14.2.30
 - react: ^18
 - react-dom: ^18
 
