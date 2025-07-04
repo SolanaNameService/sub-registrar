@@ -1,11 +1,11 @@
 <h1 align="center">SNS Subdomain Registrar</h1>
 <br />
 <p align="center">
-<img width="250" src="https://bafybeigmoph2jbhw4hjbqqgfj453tenw25g5je6ps35tftfe4tyil2k2re.ipfs.dweb.link/"/>
+<img width="150" src="https://i.imgur.com/XkeyxdG.png"/>
 </p>
 <p align="center">
-<a href="https://twitter.com/bonfida">
-<img src="https://img.shields.io/twitter/url?label=Bonfida&style=social&url=https%3A%2F%2Ftwitter.com%2Fbonfida">
+<a href="https://twitter.com/sns">
+<img src="https://img.shields.io/twitter/url?label=SNS&style=social&url=https%3A%2F%2Ftwitter.com%2Fsns">
 </a>
 </p>
 <br />
@@ -69,4 +69,4 @@ A reproducible build script (`build.sh`) can be used to build the program using 
 
 ## Security
 
-For security disclosures or to report a bug, please visit [ImmuneFi](https://immunefi.com/bounty/bonfida/) for more information on our bug bounty program.
+For security disclosures or to report a bug, please visit [ImmuneFi](https://immunefi.com/bounty/sns/) for more information on our bug bounty program.
