@@ -4277,7 +4277,8 @@ checksum = "3c5e1a9a646d36c3599cd173a41282daf47c44583ad367b8e6837255952e5c67"
 [[package]]
 name = "sns-registrar"
 version = "0.1.0"
-source = "git+ssh://git@github.com/Bonfida/sns-registrar.git?branch=chore%2Fupgrade-solana-toolchain#3193596ad40e5239d6eb16b0374fdff97660a6c3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fc969af2ee1d9fde6b706b0cd0f2f2905abb4406373cb8a046bb9addeb519e42"
 dependencies = [
  "bonfida-utils",
  "borsh 0.10.4",
