@@ -1,5 +1,6 @@
 import typescript from "@rollup/plugin-typescript";
 import commonjs from "@rollup/plugin-commonjs";
+import json from "@rollup/plugin-json";
 import terser from "@rollup/plugin-terser";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 import replace from "@rollup/plugin-replace";
@@ -22,6 +23,7 @@ export default {
       preferBuiltins: false,
       dedupe: ["buffer", "borsh", "@solana/buffer-layout", "@solana/spl-token"],
     }),
+    json(),
     typescript(),
     commonjs(),
     babel({ babelHelpers: "bundled" }),

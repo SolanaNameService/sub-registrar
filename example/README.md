@@ -36,9 +36,9 @@ The server will start running at http://localhost:3000.
 
 ## Dependencies
 
-- @bonfida/emojis: ^1.0.6
-- @bonfida/spl-name-service: 3.0.12
-- @bonfida/sub-register: ^0.1.0
+- @bonfida/emojis: ^1.0.7
+- @bonfida/spl-name-service: ^4.0.1
+- @bonfida/sub-register: ^1.0.0
 - @solana/wallet-adapter-base: ^0.9.27
 - @solana/wallet-adapter-react: ^0.15.39
 - @solana/wallet-adapter-react-ui: ^0.9.39

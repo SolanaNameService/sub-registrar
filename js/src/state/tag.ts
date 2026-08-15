@@ -5,4 +5,5 @@ export enum Tag {
   SubRecord,
   ClosedSubRecord,
   MintRecord,
+  RevokedSubRecord,
 }
