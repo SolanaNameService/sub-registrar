@@ -1,7 +1,7 @@
 import { ChangeEventHandler, useState } from "react";
 import Link from "next/link";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { getDomainKeySync, NAME_PROGRAM_ID } from "@bonfida/spl-name-service";
+import { getSnsDomainKeySync, NAME_PROGRAM_ID } from "@bonfida/spl-name-service";
 import { ExternalLink } from "@/components/icons/ExternalLink";
 import { isValidSubdomain } from "@/utils/string";
 
@@ -31,7 +31,7 @@ export const SubdomainSearch = () => {
   };
 
   const onSearch = async () => {
-    const { pubkey } = getDomainKeySync(
+    const { pubkey } = getSnsDomainKeySync(
       `${subdomain}.${process.env.NEXT_PUBLIC_DOMAIN_NAME}`
     );
     const info = await connection.getAccountInfo(pubkey);

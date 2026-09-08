@@ -1,10 +1,10 @@
 import {
-  getDomainKeySync,
+  getSnsDomainKeySync,
   getReverseKeySync,
   NAME_PROGRAM_ID,
   reverseLookup,
   REVERSE_LOOKUP_CLASS,
-  ROOT_DOMAIN_ACCOUNT,
+  SNS_ROOT_DOMAIN_ACCOUNT,
   REGISTER_PROGRAM_ID,
 } from "@bonfida/spl-name-service";
 import {
@@ -45,11 +45,11 @@ import { getMetadataKeyFromMint } from "./utils";
  * Mainnet program ID
  */
 export const SUB_REGISTER_ID = new PublicKey(
-  "2KkyPzjaAYaz2ojQZ9P3xYakLd96B5UH6a2isLaZ4Cgs"
+  "2KkyPzjaAYaz2ojQZ9P3xYakLd96B5UH6a2isLaZ4Cgs",
 );
 
 export const SUB_REGISTER_ID_DEVNET = new PublicKey(
-  "31tT5CmpphAtRL3mstu962zeYH7C6TEkJWLB5nYxciBB"
+  "31tT5CmpphAtRL3mstu962zeYH7C6TEkJWLB5nYxciBB",
 );
 
 const FEE_OWNER = new PublicKey("5D2zKog251d6KPCyFyLMt3KroWwXXPWSgTPyhV22K2gR");
@@ -79,9 +79,9 @@ export const createRegistrar = async (
   nftGatedCollection: PublicKey | null,
   maxNftMint: number | null,
   allowRevoke: boolean,
-  programId = SUB_REGISTER_ID
+  programId = SUB_REGISTER_ID,
 ) => {
-  const { pubkey } = getDomainKeySync(domain);
+  const { pubkey } = getSnsDomainKeySync(domain);
   const [registrar] = Registrar.findKey(pubkey, SUB_REGISTER_ID);
   const ix = new createRegistrarInstruction({
     mint: mint.toBuffer(),
@@ -101,7 +101,7 @@ export const createRegistrar = async (
     pubkey,
     domainOwner,
     feePayer,
-    NAME_PROGRAM_ID
+    NAME_PROGRAM_ID,
   );
   return [ix];
 };
@@ -121,7 +121,7 @@ export const closeRegistrar = async (
   authority: PublicKey,
   newDomainOwner: PublicKey,
   lamportsTarget: PublicKey,
-  programId = SUB_REGISTER_ID
+  programId = SUB_REGISTER_ID,
 ) => {
   const obj = await Registrar.retrieve(connection, registrar);
   const ix = new closeRegistrarInstruction().getInstruction(
@@ -132,7 +132,7 @@ export const closeRegistrar = async (
     newDomainOwner,
     lamportsTarget,
     authority,
-    NAME_PROGRAM_ID
+    NAME_PROGRAM_ID,
   );
   return [ix];
 };
@@ -156,7 +156,7 @@ export const editRegistrar = async (
   newFeeAccount: PublicKey | undefined,
   newPriceSchedule: Schedule[] | undefined,
   newMaxNftMint: number | undefined,
-  programId = SUB_REGISTER_ID
+  programId = SUB_REGISTER_ID,
 ) => {
   const obj = await Registrar.retrieve(connection, registrar);
   const ix = new editRegistrarInstruction({
@@ -171,7 +171,7 @@ export const editRegistrar = async (
     programId,
     SystemProgram.programId,
     obj.authority,
-    registrar
+    registrar,
   );
   return [ix];
 };
@@ -191,13 +191,13 @@ export const register = async (
   buyer: PublicKey,
   nftAccount: PublicKey,
   subDomain: string,
-  programId = SUB_REGISTER_ID
+  programId = SUB_REGISTER_ID,
 ) => {
   const ixs: TransactionInstruction[] = [];
   const obj = await Registrar.retrieve(connection, registrar);
   const parent = await reverseLookup(connection, obj.domain);
 
-  const { pubkey } = getDomainKeySync(subDomain + "." + parent);
+  const { pubkey } = getSnsDomainKeySync(subDomain + "." + parent);
   const reverseKey = getReverseKeySync(subDomain + "." + parent, true);
 
   let nftMetadata: PublicKey | undefined = undefined;
@@ -222,7 +222,7 @@ export const register = async (
       buyer,
       bonfidaFee,
       FEE_OWNER,
-      obj.mint
+      obj.mint,
     );
     ixs.push(ixCreateFee);
   }
@@ -236,7 +236,7 @@ export const register = async (
     NAME_PROGRAM_ID,
     SYSVAR_RENT_PUBKEY,
     REGISTER_PROGRAM_ID,
-    ROOT_DOMAIN_ACCOUNT,
+    SNS_ROOT_DOMAIN_ACCOUNT,
     REVERSE_LOOKUP_CLASS,
     obj.feeAccount,
     feeSource,
@@ -249,7 +249,7 @@ export const register = async (
     subRecord,
     nftAccount,
     nftMetadata,
-    nftMintRecord
+    nftMintRecord,
   );
   ixs.push(ix);
 
@@ -270,7 +270,7 @@ export const deleteSubrecord = async (
   registrar: PublicKey,
   subDomain: PublicKey,
   lamportsTarget: PublicKey,
-  programId = SUB_REGISTER_ID
+  programId = SUB_REGISTER_ID,
 ) => {
   const obj = await Registrar.retrieve(connection, registrar);
   const [subRecord] = SubRecord.findKey(subDomain, programId);
@@ -287,7 +287,7 @@ export const deleteSubrecord = async (
     subDomain,
     subRecord,
     lamportsTarget,
-    mintRecord
+    mintRecord,
   );
   return [ix];
 };
@@ -306,11 +306,11 @@ export const unregister = async (
   registrar: PublicKey,
   subDomain: string,
   owner: PublicKey,
-  programId = SUB_REGISTER_ID
+  programId = SUB_REGISTER_ID,
 ) => {
   const obj = await Registrar.retrieve(connection, registrar);
   const parent = await reverseLookup(connection, obj.domain);
-  const { pubkey } = getDomainKeySync(subDomain + "." + parent);
+  const { pubkey } = getSnsDomainKeySync(subDomain + "." + parent);
   const [subRecord] = SubRecord.findKey(pubkey, programId);
 
   let mintRecord: PublicKey | undefined = undefined;
@@ -327,7 +327,7 @@ export const unregister = async (
     pubkey,
     subRecord,
     owner,
-    mintRecord
+    mintRecord,
   );
   return [ix];
 };
@@ -346,11 +346,11 @@ export const adminRegister = async (
   registrar: PublicKey,
   subDomain: string,
   authority: PublicKey,
-  programId = SUB_REGISTER_ID
+  programId = SUB_REGISTER_ID,
 ) => {
   const obj = await Registrar.retrieve(connection, registrar);
   const parent = await reverseLookup(connection, obj.domain);
-  const { pubkey } = getDomainKeySync(subDomain + "." + parent);
+  const { pubkey } = getSnsDomainKeySync(subDomain + "." + parent);
   const reverse = getReverseKeySync(subDomain + "." + parent, true);
   const [subRecord] = SubRecord.findKey(pubkey, programId);
 
@@ -363,14 +363,14 @@ export const adminRegister = async (
     NAME_PROGRAM_ID,
     SYSVAR_RENT_PUBKEY,
     REGISTER_PROGRAM_ID,
-    ROOT_DOMAIN_ACCOUNT,
+    SNS_ROOT_DOMAIN_ACCOUNT,
     REVERSE_LOOKUP_CLASS,
     registrar,
     obj.domain,
     pubkey,
     reverse,
     subRecord,
-    authority
+    authority,
   );
   return [ix];
 };
@@ -391,7 +391,7 @@ export const nftOwnerRevoke = async (
   subOwner: PublicKey,
   nftOwner: PublicKey,
   subDomainAccount: PublicKey,
-  programId = SUB_REGISTER_ID
+  programId = SUB_REGISTER_ID,
 ) => {
   const obj = await Registrar.retrieve(connection, registrar);
   const [subRecord] = SubRecord.findKey(subDomainAccount, programId);
@@ -403,7 +403,7 @@ export const nftOwnerRevoke = async (
 
   const mintRecord = await MintRecord.retrieve(
     connection,
-    subRecordObj.mintRecord
+    subRecordObj.mintRecord,
   );
 
   const ix = new nftOwnerRevokeInstruction().getInstruction(
@@ -418,7 +418,7 @@ export const nftOwnerRevoke = async (
     getMetadataKeyFromMint(mintRecord.mint),
     subRecordObj.mintRecord,
     PublicKey.default,
-    NAME_PROGRAM_ID
+    NAME_PROGRAM_ID,
   );
   return [ix];
 };
@@ -439,11 +439,11 @@ export const adminRevoke = async (
   subDomain: string,
   owner: PublicKey,
   authority: PublicKey,
-  programId = SUB_REGISTER_ID
+  programId = SUB_REGISTER_ID,
 ) => {
   const obj = await Registrar.retrieve(connection, registrar);
   const parent = await reverseLookup(connection, obj.domain);
-  const { pubkey } = getDomainKeySync(subDomain + "." + parent);
+  const { pubkey } = getSnsDomainKeySync(subDomain + "." + parent);
   const [subRecord] = SubRecord.findKey(pubkey, programId);
 
   let mintRecord: PublicKey | undefined = undefined;
@@ -461,7 +461,7 @@ export const adminRevoke = async (
     authority,
     PublicKey.default,
     NAME_PROGRAM_ID,
-    mintRecord
+    mintRecord,
   );
 
   return [ix];

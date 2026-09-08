@@ -34,7 +34,7 @@ Subdomain issuance is monitored through `SubRecord` accounts, which track each s
 ```ts
 // Creating a registrar
 
-const domain = "awesome.sol"; // Domain name
+const domain = "awesome"; // Domain name without the .sol suffix
 const domainOwner = new PublicKey("..."); // Domain owner
 const feePayer = new PublicKey("..."); // Fee payer
 const tokenMint = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"); // Token mint used for payments e.g USDC

@@ -18,7 +18,7 @@ export class SubRecord {
       registrar: { array: { type: "u8", len: 32 } },
       subKey: { array: { type: "u8", len: 32 } },
       mintRecord: { option: { array: { type: "u8", len: 32 } } },
-      expiryTimestamp: "u64",
+      expiryTimestamp: "i64",
       allocator: { array: { type: "u8", len: 32 } },
     },
   };

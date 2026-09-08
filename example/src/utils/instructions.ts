@@ -1,8 +1,8 @@
 import { ADMIN_KEYPAIR, CONNECTION } from "@/config";
 import {
   createNameRegistry,
-  createReverseName,
-  getDomainKeySync,
+  createReverse,
+  getSnsDomainKeySync,
   getReverseKeySync,
   NAME_PROGRAM_ID,
   NameRegistryState,
@@ -30,8 +30,8 @@ export const getCreateSubdomainForSubregistrarIxs = async ({
   targetPublicKey: string;
 }): Promise<TransactionInstruction[]> => {
   const subRegistrar = await getSubRegistrar();
-  const { pubkey: subKey, parent: parentKey } = getDomainKeySync(
-    `${subdomain}.${process.env.NEXT_PUBLIC_DOMAIN_NAME}`
+  const { pubkey: subKey, parent: parentKey } = getSnsDomainKeySync(
+    `${subdomain}.${process.env.NEXT_PUBLIC_DOMAIN_NAME}`,
   );
 
   return [
@@ -40,7 +40,7 @@ export const getCreateSubdomainForSubregistrarIxs = async ({
       CONNECTION,
       subRegistrar.pubkey,
       subdomain,
-      ADMIN_KEYPAIR.publicKey
+      ADMIN_KEYPAIR.publicKey,
     )),
     // Sends registered subdomain to target account
     transferInstruction(
@@ -50,7 +50,7 @@ export const getCreateSubdomainForSubregistrarIxs = async ({
       ADMIN_KEYPAIR.publicKey,
       undefined,
       parentKey,
-      ADMIN_KEYPAIR.publicKey
+      ADMIN_KEYPAIR.publicKey,
     ),
   ];
 };
@@ -73,15 +73,15 @@ export const getCreateSubdomainIxs = async ({
   const instructions: TransactionInstruction[] = [];
   const parentDomain = process.env.NEXT_PUBLIC_DOMAIN_NAME;
 
-  const { pubkey: subKey, parent: parentKey } = getDomainKeySync(
-    `${subdomain}.${parentDomain}`
+  const { pubkey: subKey, parent: parentKey } = getSnsDomainKeySync(
+    `${subdomain}.${parentDomain}`,
   );
 
   const reverseKey = getReverseKeySync(`${subdomain}.${parentDomain}`, true);
 
   if (!(await checkAccountExists(CONNECTION, subKey))) {
     const lamports = await CONNECTION.getMinimumBalanceForRentExemption(
-      NameRegistryState.HEADER_LEN
+      NameRegistryState.HEADER_LEN,
     );
     const createSubDomainIx = await createNameRegistry(
       CONNECTION,
@@ -91,18 +91,18 @@ export const getCreateSubdomainIxs = async ({
       new PublicKey(targetPublicKey),
       lamports,
       undefined,
-      parentKey
+      parentKey,
     );
     instructions.push(createSubDomainIx);
   }
 
   if (!(await checkAccountExists(CONNECTION, reverseKey))) {
-    const createReverseNameIxs = await createReverseName(
+    const createReverseNameIxs = await createReverse(
       subKey,
       `\0${subdomain}`,
       ADMIN_KEYPAIR.publicKey,
       parentKey,
-      ADMIN_KEYPAIR.publicKey
+      ADMIN_KEYPAIR.publicKey,
     );
     instructions.push(...createReverseNameIxs);
   }
