@@ -1,7 +1,4 @@
-use mpl_token_metadata::{
-    accounts::Metadata,
-    types::{Collection, Key},
-};
+use sns_registrar::mpl_token_metadata::{Collection, Key, Metadata, TokenStandard};
 use solana_program::program_option::COption;
 
 use {
@@ -29,7 +26,7 @@ pub fn get_metadata() -> Metadata {
         primary_sale_happened: true,
         is_mutable: true,
         edition_nonce: Some(255),
-        token_standard: Some(mpl_token_metadata::types::TokenStandard::NonFungible),
+        token_standard: Some(TokenStandard::NonFungible),
         collection: Some(Collection {
             key: COLLECTION_KEY,
             verified: true,

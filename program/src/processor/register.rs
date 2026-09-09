@@ -1,6 +1,6 @@
 //! Register a subdomain
 
-use mpl_token_metadata::accounts::Metadata;
+use sns_registrar::mpl_token_metadata::Metadata;
 use sns_registrar::processor::create_reverse;
 use solana_program::clock::Clock;
 
@@ -33,10 +33,10 @@ use {
         program_pack::Pack,
         pubkey::Pubkey,
         rent::Rent,
-        system_instruction::transfer,
-        system_program, sysvar,
+        sysvar,
         sysvar::Sysvar,
     },
+    solana_system_interface::{instruction::transfer, program as system_program},
     spl_name_service::state::{get_seeds_and_key, NameRecordHeader, HASH_PREFIX},
 };
 
@@ -208,7 +208,11 @@ pub fn process(program_id: &Pubkey, accounts: &[AccountInfo], params: Params) ->
 
         // Accounts checks
         check_account_owner(nft_account, &spl_token::ID).unwrap();
-        check_account_owner(nft_metadata_account, &mpl_token_metadata::ID).unwrap();
+        check_account_owner(
+            nft_metadata_account,
+            &sns_registrar::constants::MPL_TOKEN_METADATA_PROGRAM,
+        )
+        .unwrap();
 
         let mint = check_nft_holding_and_get_mint(nft_account, accounts.fee_payer.key)?;
         check_metadata(nft_metadata_account, collection)?;

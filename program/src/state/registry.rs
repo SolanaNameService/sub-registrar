@@ -86,10 +86,21 @@ impl Registrar {
 
 #[cfg(test)]
 mod tests {
-    use std::{cell::RefCell, rc::Rc, u8};
-
     use super::*;
     use crate::state::Tag;
+
+    fn account_info<'a>(data: &'a mut [u8]) -> AccountInfo<'a> {
+        let owner = Box::leak(Box::new(Pubkey::default()));
+        AccountInfo::new(
+            owner,
+            false,
+            false,
+            Box::leak(Box::new(0)),
+            data,
+            owner,
+            false,
+        )
+    }
 
     #[test]
     fn test_from_account_info() {
@@ -104,69 +115,21 @@ mod tests {
         let mut buf: Vec<u8> = vec![0; registrar.borsh_len()];
         registrar.save(&mut buf[..]);
 
-        let des = Registrar::from_account_info(
-            &AccountInfo {
-                data: Rc::new(RefCell::new(&mut buf[..])),
-                key: &Pubkey::default(),
-                is_signer: false,
-                is_writable: false,
-                lamports: Rc::new(RefCell::new(&mut 0)),
-                owner: &Pubkey::default(),
-                executable: false,
-                rent_epoch: 0,
-            },
-            Tag::Registrar,
-        )
-        .unwrap();
+        let des =
+            Registrar::from_account_info(&account_info(&mut buf[..]), Tag::Registrar).unwrap();
         assert_eq!(registrar, des);
 
-        let res = Registrar::from_account_info(
-            &AccountInfo {
-                data: Rc::new(RefCell::new(&mut buf[..])),
-                key: &Pubkey::default(),
-                is_signer: false,
-                is_writable: false,
-                lamports: Rc::new(RefCell::new(&mut 0)),
-                owner: &Pubkey::default(),
-                executable: false,
-                rent_epoch: 0,
-            },
-            Tag::ClosedRegistrar,
-        );
+        let res = Registrar::from_account_info(&account_info(&mut buf[..]), Tag::ClosedRegistrar);
         assert!(res.is_err());
 
         let mut buf: Vec<u8> = vec![0; registrar.borsh_len()];
         closed_registrar.save(&mut buf);
 
-        let des = Registrar::from_account_info(
-            &AccountInfo {
-                data: Rc::new(RefCell::new(&mut buf[..])),
-                key: &Pubkey::default(),
-                is_signer: false,
-                is_writable: false,
-                lamports: Rc::new(RefCell::new(&mut 0)),
-                owner: &Pubkey::default(),
-                executable: false,
-                rent_epoch: 0,
-            },
-            Tag::ClosedRegistrar,
-        )
-        .unwrap();
+        let des = Registrar::from_account_info(&account_info(&mut buf[..]), Tag::ClosedRegistrar)
+            .unwrap();
         assert_eq!(closed_registrar, des);
 
-        let res = Registrar::from_account_info(
-            &AccountInfo {
-                data: Rc::new(RefCell::new(&mut buf[..])),
-                key: &Pubkey::default(),
-                is_signer: false,
-                is_writable: false,
-                lamports: Rc::new(RefCell::new(&mut 0)),
-                owner: &Pubkey::default(),
-                executable: false,
-                rent_epoch: 0,
-            },
-            Tag::Registrar,
-        );
+        let res = Registrar::from_account_info(&account_info(&mut buf[..]), Tag::Registrar);
         assert!(res.is_err());
     }
 }

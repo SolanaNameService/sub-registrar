@@ -11,7 +11,7 @@ use solana_sdk::account::Account;
 use solana_sdk::signature::Signer;
 use solana_sdk::{signature::Keypair, transaction::Transaction};
 use spl_token::state::Mint;
-use sub_register::state::schedule::{Price, Schedule};
+use sub_registrar::state::schedule::{Price, Schedule};
 
 // Utils
 pub async fn sign_send_instructions(

@@ -18,8 +18,8 @@ use {
         program_error::ProgramError,
         program_pack::Pack,
         pubkey::Pubkey,
-        system_program,
     },
+    solana_system_interface::program as system_program,
     spl_name_service::{instruction::delete, state::NameRecordHeader},
 };
 

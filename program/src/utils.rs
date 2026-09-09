@@ -1,6 +1,6 @@
 use std::convert::TryFrom;
 
-use mpl_token_metadata::accounts::Metadata;
+use sns_registrar::mpl_token_metadata::Metadata;
 use solana_program::{program_error::ProgramError, program_pack::Pack};
 
 use crate::{
@@ -116,10 +116,21 @@ pub fn check_metadata(
 #[cfg(test)]
 mod tests {
     use borsh::BorshSerialize;
-    use mpl_token_metadata::types::{Collection, Key};
+    use sns_registrar::mpl_token_metadata::{Collection, Key};
 
     use super::*;
-    use std::{cell::RefCell, rc::Rc};
+
+    fn account_info<'a>(data: &'a mut [u8], owner: &'a Pubkey) -> AccountInfo<'a> {
+        AccountInfo::new(
+            owner,
+            false,
+            true,
+            Box::leak(Box::new(0)),
+            data,
+            owner,
+            false,
+        )
+    }
     #[test]
     fn test_price_logic() {
         use crate::state::schedule::Price;
@@ -238,34 +249,14 @@ mod tests {
         spl_token::state::Account::pack(data, &mut buf).unwrap();
 
         // Correct owner with 1 token
-        check_nft_holding_and_get_mint(
-            &AccountInfo {
-                key: &Pubkey::new_unique(),
-                is_signer: false,
-                is_writable: true,
-                owner: &spl_token::ID,
-                lamports: Rc::new(RefCell::new(&mut 0)),
-                data: Rc::new(RefCell::new(&mut buf[..])),
-                executable: false,
-                rent_epoch: 0,
-            },
-            &owner,
-        )
-        .unwrap();
+        check_nft_holding_and_get_mint(&account_info(&mut buf[..], &spl_token::ID), &owner)
+            .unwrap();
 
         // Wrong owner with 1 token
+        let wrong_owner = Pubkey::new_unique();
         let res = check_nft_holding_and_get_mint(
-            &AccountInfo {
-                key: &Pubkey::new_unique(),
-                is_signer: false,
-                is_writable: true,
-                owner: &spl_token::ID,
-                lamports: Rc::new(RefCell::new(&mut 0)),
-                data: Rc::new(RefCell::new(&mut buf[..])),
-                executable: false,
-                rent_epoch: 0,
-            },
-            &Pubkey::new_unique(),
+            &account_info(&mut buf[..], &spl_token::ID),
+            &wrong_owner,
         );
         assert!(res.is_err());
 
@@ -273,34 +264,15 @@ mod tests {
         data.amount = 0;
         let mut buf: Vec<u8> = vec![0; spl_token::state::Account::LEN];
         spl_token::state::Account::pack(data, &mut buf).unwrap();
-        let res = check_nft_holding_and_get_mint(
-            &AccountInfo {
-                key: &Pubkey::new_unique(),
-                is_signer: false,
-                is_writable: true,
-                owner: &spl_token::ID,
-                lamports: Rc::new(RefCell::new(&mut 0)),
-                data: Rc::new(RefCell::new(&mut buf[..])),
-                executable: false,
-                rent_epoch: 0,
-            },
-            &owner,
-        );
+        let res =
+            check_nft_holding_and_get_mint(&account_info(&mut buf[..], &spl_token::ID), &owner);
         assert!(res.is_err());
 
         // Wrong owner with 0 token
+        let wrong_owner = Pubkey::new_unique();
         let res = check_nft_holding_and_get_mint(
-            &AccountInfo {
-                key: &Pubkey::new_unique(),
-                is_signer: false,
-                is_writable: true,
-                owner: &spl_token::ID,
-                lamports: Rc::new(RefCell::new(&mut 0)),
-                data: Rc::new(RefCell::new(&mut buf[..])),
-                executable: false,
-                rent_epoch: 0,
-            },
-            &Pubkey::new_unique(),
+            &account_info(&mut buf[..], &spl_token::ID),
+            &wrong_owner,
         );
         assert!(res.is_err());
     }
@@ -332,16 +304,10 @@ mod tests {
         let mut buf = vec![];
         metadata.serialize(&mut buf).unwrap();
         check_metadata(
-            &AccountInfo {
-                key: &Pubkey::new_unique(),
-                is_signer: false,
-                is_writable: true,
-                owner: &mpl_token_metadata::ID,
-                lamports: Rc::new(RefCell::new(&mut 0)),
-                data: Rc::new(RefCell::new(&mut buf[..])),
-                executable: false,
-                rent_epoch: 0,
-            },
+            &account_info(
+                &mut buf[..],
+                &sns_registrar::constants::MPL_TOKEN_METADATA_PROGRAM,
+            ),
             &collection,
         )
         .unwrap();
@@ -371,16 +337,10 @@ mod tests {
         let mut buf = vec![];
         metadata.serialize(&mut buf).unwrap();
         assert!(check_metadata(
-            &AccountInfo {
-                key: &Pubkey::new_unique(),
-                is_signer: false,
-                is_writable: true,
-                owner: &mpl_token_metadata::ID,
-                lamports: Rc::new(RefCell::new(&mut 0)),
-                data: Rc::new(RefCell::new(&mut buf[..])),
-                executable: false,
-                rent_epoch: 0,
-            },
+            &account_info(
+                &mut buf[..],
+                &sns_registrar::constants::MPL_TOKEN_METADATA_PROGRAM,
+            ),
             &collection
         )
         .is_err());
@@ -410,16 +370,10 @@ mod tests {
         let mut buf = vec![];
         metadata.serialize(&mut buf).unwrap();
         assert!(check_metadata(
-            &AccountInfo {
-                key: &Pubkey::new_unique(),
-                is_signer: false,
-                is_writable: true,
-                owner: &mpl_token_metadata::ID,
-                lamports: Rc::new(RefCell::new(&mut 0)),
-                data: Rc::new(RefCell::new(&mut buf[..])),
-                executable: false,
-                rent_epoch: 0,
-            },
+            &account_info(
+                &mut buf[..],
+                &sns_registrar::constants::MPL_TOKEN_METADATA_PROGRAM,
+            ),
             &collection
         )
         .is_err());
@@ -446,16 +400,10 @@ mod tests {
         let mut buf = vec![];
         metadata.serialize(&mut buf).unwrap();
         assert!(check_metadata(
-            &AccountInfo {
-                key: &Pubkey::new_unique(),
-                is_signer: false,
-                is_writable: true,
-                owner: &mpl_token_metadata::ID,
-                lamports: Rc::new(RefCell::new(&mut 0)),
-                data: Rc::new(RefCell::new(&mut buf[..])),
-                executable: false,
-                rent_epoch: 0,
-            },
+            &account_info(
+                &mut buf[..],
+                &sns_registrar::constants::MPL_TOKEN_METADATA_PROGRAM,
+            ),
             &collection
         )
         .is_err());

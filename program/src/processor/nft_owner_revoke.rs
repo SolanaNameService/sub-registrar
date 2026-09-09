@@ -1,6 +1,6 @@
 //! In the case of ...
 
-use mpl_token_metadata::accounts::Metadata;
+use sns_registrar::mpl_token_metadata::Metadata;
 
 use crate::{
     error::SubRegisterError,
@@ -95,7 +95,10 @@ impl<'a, 'b: 'a> Accounts<'a, AccountInfo<'b>> {
         check_account_owner(accounts.sub_record, program_id)?;
         check_account_owner(accounts.parent_domain, &spl_name_service::ID)?;
         check_account_owner(accounts.nft_account, &spl_token::ID)?;
-        check_account_owner(accounts.nft_metadata, &mpl_token_metadata::ID)?;
+        check_account_owner(
+            accounts.nft_metadata,
+            &sns_registrar::constants::MPL_TOKEN_METADATA_PROGRAM,
+        )?;
         check_account_owner(accounts.nft_mint_record, program_id)?;
 
         // Check signer
