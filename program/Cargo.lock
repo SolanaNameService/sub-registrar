@@ -4734,9 +4734,9 @@ dependencies = [
 
 [[package]]
 name = "sns-registrar"
-version = "0.2.0-beta.0"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6308ba493e542f10f18ae70b7ee9cf5a9b10d0cf1424793afbd6e9ff7cdb3f2c"
+checksum = "758e7bae01c6a3042274099ff571713bcd456c799914b70552d8b62eec9410bc"
 dependencies = [
  "bonfida-utils",
  "borsh",
@@ -8151,7 +8151,7 @@ dependencies = [
 
 [[package]]
 name = "sub-registrar"
-version = "0.2.0-beta.1"
+version = "0.2.0"
 dependencies = [
  "arrayref",
  "async-trait",

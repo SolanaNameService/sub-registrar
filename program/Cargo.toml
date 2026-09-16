@@ -1,6 +1,6 @@
 [package]
 name = "sub-registrar"
-version = "0.2.0-beta.1"
+version = "0.2.0"
 edition = "2018"
 resolver = "2"
 repository = "https://github.com/SolanaNameService/sub-registrar"
@@ -15,7 +15,7 @@ test-bpf = []
 devnet = ["sns-registrar/devnet"]
 
 [dependencies]
-sns-registrar = { version = "0.2.0-beta.0", features = ["no-entrypoint"] }
+sns-registrar = { version = "0.2.0", features = ["no-entrypoint"] }
 solana-program = "4.0.0"
 num_enum = "0.5.4"
 borsh = { version = "1.7.0", features = ["derive"] }
