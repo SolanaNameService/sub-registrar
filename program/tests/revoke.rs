@@ -1,7 +1,7 @@
-use solana_program::{instruction::InstructionError, program_pack::Pack};
+use solana_program::instruction::InstructionError;
 use solana_program_test::BanksClientError;
 use solana_sdk::transaction::TransactionError;
-use sub_register::{
+use sub_registrar::{
     entrypoint::process_instruction,
     error::SubRegisterError,
     instruction::{admin_register, admin_revoke, create_registrar, register, unregister},
@@ -16,13 +16,14 @@ use sub_register::{
 use crate::common::utils::ProgramTestContextExtended;
 use {
     borsh::BorshSerialize,
-    solana_program::{system_program, sysvar},
+    solana_program::sysvar,
     solana_program_test::{processor, ProgramTest},
     solana_sdk::{
         account::Account,
         pubkey::Pubkey,
         signer::{keypair::Keypair, Signer},
     },
+    solana_system_interface::program as system_program,
     spl_associated_token_account::get_associated_token_address,
     spl_associated_token_account::instruction::create_associated_token_account,
 };
@@ -41,7 +42,7 @@ async fn test_revoke_impersonation_safety() {
     pub const CHARLIE: usize = 2;
 
     let keypairs = (0..NUMBER_OF_ACTORS)
-        .map(|n| Keypair::new())
+        .map(|_| Keypair::new())
         .collect::<Vec<_>>();
 
     println!("[+] Alice key {}", keypairs[ALICE].pubkey());
@@ -49,14 +50,13 @@ async fn test_revoke_impersonation_safety() {
     println!("[+] Charlie key {}", keypairs[CHARLIE].pubkey());
 
     let mut program_test = ProgramTest::new(
-        "sub_register",
-        sub_register::ID,
+        "sub_registrar",
+        sub_registrar::ID,
         processor!(process_instruction),
     );
 
     program_test.add_program("spl_name_service", spl_name_service::ID, None);
     program_test.add_program("sns_registrar", sns_registrar::ID, None);
-    program_test.add_program("mpl_token_metadata", mpl_token_metadata::ID, None);
 
     // Add mock NFT & collection
     let mut data: Vec<u8> = vec![];
@@ -66,7 +66,7 @@ async fn test_revoke_impersonation_safety() {
     program_test.add_account(
         common::metadata::NFT_METADATA_KEY,
         Account {
-            owner: mpl_token_metadata::ID,
+            owner: sns_registrar::constants::MPL_TOKEN_METADATA_PROGRAM,
             lamports: 100_000_000_000,
             data,
             ..Account::default()
@@ -97,12 +97,11 @@ async fn test_revoke_impersonation_safety() {
     let name_key = Keypair::new().pubkey();
     println!("[+] Domain name key {}", name_key);
 
-    let root_domain_data = spl_name_service::state::NameRecordHeader {
+    let root_domain_data = borsh::to_vec(&spl_name_service::state::NameRecordHeader {
         parent_name: ROOT_DOMAIN_ACCOUNT,
         owner: keypairs[ALICE].pubkey(),
         class: Pubkey::default(),
-    }
-    .try_to_vec()
+    })
     .unwrap();
     program_test.add_account(
         name_key,
@@ -179,7 +178,7 @@ async fn test_revoke_impersonation_safety() {
     let bonfida_fee_account = &get_associated_token_address(&FEE_ACC_OWNER, &mint);
 
     // Alice creates registry
-    let (registry_key, _) = Registrar::find_key(&name_key, &sub_register::ID);
+    let (registry_key, _) = Registrar::find_key(&name_key, &sub_registrar::ID);
     println!("[+] Registry key {}", registry_key);
 
     let ix = create_registrar(
@@ -216,9 +215,9 @@ async fn test_revoke_impersonation_safety() {
         .unwrap();
 
     let sub_domain = random_string();
-    let sub_domain_key = sub_register::utils::get_subdomain_key(&sub_domain, &name_key);
-    let sub_reverse_key = sub_register::utils::get_subdomain_reverse(&sub_domain, &name_key);
-    let (subrecord_key, _) = SubDomainRecord::find_key(&sub_domain_key, &sub_register::ID);
+    let sub_domain_key = sub_registrar::utils::get_subdomain_key(&sub_domain, &name_key);
+    let sub_reverse_key = sub_registrar::utils::get_subdomain_reverse(&sub_domain, &name_key);
+    let (subrecord_key, _) = SubDomainRecord::find_key(&sub_domain_key, &sub_registrar::ID);
 
     // Bob registers a subdomain
     let ix = register(

@@ -1,4 +1,4 @@
-FROM rust:1.87.0
+FROM rust:1.95.0
 
 ENV HOME="/nonroot"
 ENV PATH="${HOME}/.local/share/solana/install/active_release/bin:${PATH}"
@@ -14,7 +14,7 @@ USER $HOST_UID:$HOST_GID
 
 
 # Install Solana tools.
-RUN sh -c "$(curl -sSfL https://release.anza.xyz/v2.1.21/install)"
+RUN sh -c "$(curl -sSfL https://release.anza.xyz/v4.2.2/install)"
 
 WORKDIR /nonroot
 

@@ -24,9 +24,10 @@ use {
         program_pack::Pack,
         pubkey::Pubkey,
         rent::Rent,
-        system_program, sysvar,
+        sysvar,
         sysvar::Sysvar,
     },
+    solana_system_interface::program as system_program,
     spl_name_service::state::{get_seeds_and_key, NameRecordHeader, HASH_PREFIX},
 };
 

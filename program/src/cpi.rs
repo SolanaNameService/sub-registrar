@@ -1,8 +1,9 @@
 use solana_program::{
     account_info::AccountInfo, entrypoint::ProgramResult, instruction::AccountMeta, msg,
     program::invoke_signed, program_error::ProgramError, program_pack::Pack, pubkey::Pubkey,
-    rent::Rent, system_instruction, system_instruction::create_account, sysvar::Sysvar,
+    rent::Rent, sysvar::Sysvar,
 };
+use solana_system_interface::instruction::{create_account, transfer};
 
 use crate::state::registry::Registrar;
 
@@ -21,11 +22,8 @@ impl Cpi {
     ) -> ProgramResult {
         let account_lamports = account_to_create.lamports();
         if account_lamports != 0 && account_to_create.data_is_empty() {
-            let defund_created_account = system_instruction::transfer(
-                account_to_create.key,
-                fee_payer.key,
-                account_lamports,
-            );
+            let defund_created_account =
+                transfer(account_to_create.key, fee_payer.key, account_lamports);
             invoke_signed(
                 &defund_created_account,
                 &[

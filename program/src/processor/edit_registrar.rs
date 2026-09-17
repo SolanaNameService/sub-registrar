@@ -20,9 +20,9 @@ use {
         program_error::ProgramError,
         pubkey::Pubkey,
         rent::Rent,
-        system_instruction, system_program,
         sysvar::Sysvar,
     },
+    solana_system_interface::{instruction as system_instruction, program as system_program},
     std::cmp::Ordering,
 };
 
@@ -108,14 +108,14 @@ pub fn process(program_id: &Pubkey, accounts: &[AccountInfo], params: Params) ->
         registrar.max_nft_mint = new_max_nft_mint;
     }
 
-    // Handle realloc
+    // Handle account resize
     match registrar.borsh_len().cmp(&accounts.registrar.data_len()) {
         Ordering::Greater => {
             msg!("[+] Realloc registry account (increasing size)");
             let new_lamports = Rent::get()?.minimum_balance(registrar.borsh_len());
             let diff_lamports = new_lamports.checked_sub(accounts.registrar.lamports());
 
-            accounts.registrar.realloc(registrar.borsh_len(), false)?;
+            accounts.registrar.resize(registrar.borsh_len())?;
 
             if let Some(diff_lamports) = diff_lamports {
                 let ix = system_instruction::transfer(
@@ -138,7 +138,7 @@ pub fn process(program_id: &Pubkey, accounts: &[AccountInfo], params: Params) ->
             let new_lamports = Rent::get()?.minimum_balance(registrar.borsh_len());
             let diff_lamports = accounts.registrar.lamports().checked_sub(new_lamports);
 
-            accounts.registrar.realloc(registrar.borsh_len(), true)?;
+            accounts.registrar.resize(registrar.borsh_len())?;
 
             if let Some(diff_lamports) = diff_lamports {
                 let mut registrar_lamports = accounts.registrar.lamports.borrow_mut();

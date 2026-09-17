@@ -17,8 +17,8 @@ use {
         entrypoint::ProgramResult,
         program_error::ProgramError,
         pubkey::Pubkey,
-        system_program,
     },
+    solana_system_interface::program as system_program,
 };
 
 #[derive(BorshDeserialize, BorshSerialize, BorshSize)]
